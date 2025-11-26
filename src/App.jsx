@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import MiniFooter from "./components/Minifooter.jsx";
+import MiniFooter from "./components/Minifooter";
 import { topicsData } from "./list/topicsData.js";
 
 function parseContent(raw) {
