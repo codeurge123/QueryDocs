@@ -24,6 +24,7 @@ function parseContent(raw) {
 
 export default function QueryDocs() {
   const [isDark, setIsDark] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const [activeId, setActiveId] = useState(() =>
     typeof window !== "undefined" && window.location.hash
@@ -73,53 +74,31 @@ export default function QueryDocs() {
   const codeBorder = isDark ? "border-slate-700" : "border-slate-200";
   const copyBtnBg = isDark ? "bg-slate-800/80 hover:bg-slate-700/90 text-white" : "bg-slate-100 hover:bg-slate-200 text-slate-900";
 
-  // ==== UPDATED: make sidebar and content scrollbars match ====
+  // Scrollbar CSS (keeps original)
   const scrollbarCss = isDark
     ? `
-      /* ==== SIDEBAR & CONTENT SCROLLBAR (DARK) ==== */
       .sidebar-scroll::-webkit-scrollbar,
-      .content-scroll::-webkit-scrollbar {
-        width: 10px;
-      }
+      .content-scroll::-webkit-scrollbar { width: 10px; }
       .sidebar-scroll::-webkit-scrollbar-track,
-      .content-scroll::-webkit-scrollbar-track {
-        background: transparent;
-      }
+      .content-scroll::-webkit-scrollbar-track { background: transparent; }
       .sidebar-scroll::-webkit-scrollbar-thumb,
       .content-scroll::-webkit-scrollbar-thumb {
         background: rgba(255,255,255,0.08);
-        border-radius: 999px;
-        border: 2px solid transparent;
-        background-clip: padding-box;
+        border-radius: 999px; border: 2px solid transparent; background-clip: padding-box;
       }
-      .sidebar-scroll,
-      .content-scroll {
-        scrollbar-width: thin;
-        scrollbar-color: rgba(255,255,255,0.08) transparent;
-      }
+      .sidebar-scroll, .content-scroll { scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.08) transparent; }
     `
     : `
-      /* ==== SIDEBAR & CONTENT SCROLLBAR (LIGHT) ==== */
       .sidebar-scroll::-webkit-scrollbar,
-      .content-scroll::-webkit-scrollbar {
-        width: 10px;
-      }
+      .content-scroll::-webkit-scrollbar { width: 10px; }
       .sidebar-scroll::-webkit-scrollbar-track,
-      .content-scroll::-webkit-scrollbar-track {
-        background: transparent;
-      }
+      .content-scroll::-webkit-scrollbar-track { background: transparent; }
       .sidebar-scroll::-webkit-scrollbar-thumb,
       .content-scroll::-webkit-scrollbar-thumb {
         background: rgba(0,0,0,0.18);
-        border-radius: 999px;
-        border: 2px solid transparent;
-        background-clip: padding-box;
+        border-radius: 999px; border: 2px solid transparent; background-clip: padding-box;
       }
-      .sidebar-scroll,
-      .content-scroll {
-        scrollbar-width: thin;
-        scrollbar-color: rgba(0,0,0,0.18) transparent;
-      }
+      .sidebar-scroll, .content-scroll { scrollbar-width: thin; scrollbar-color: rgba(0,0,0,0.18) transparent; }
     `;
 
   // confetti CSS (shared)
@@ -133,32 +112,64 @@ export default function QueryDocs() {
     @keyframes confetti { 0% { opacity: 0; transform: translateY(0) scale(0.6); } 50% { opacity: 1; transform: translateY(-10px) scale(1); } 100% { opacity: 0; transform: translateY(-18px) scale(0.8); } }
   `;
 
+  // handle topic change from mobile select
+  function handleMobileSelect(e) {
+    setActiveId(e.target.value);
+    setSidebarOpen(false);
+  }
+
   return (
-    <div className={`${bg} ${text} min-h-screen px-10 py-8`}>
-      {/* dynamic CSS for scrollbars & confetti */}
+    <div className={`${bg} ${text} min-h-screen px-4 sm:px-8 py-6`}>
       <style>{scrollbarCss + confettiCss}</style>
 
       {/* Header */}
-      <header className="flex items-center justify-between mb-6">
-        <div className={`rounded-lg border ${border} px-4 py-2 inline-block ${panelBg}`}>QueryDocs</div>
+      <header className="flex items-center justify-between mb-4">
+        <div className={`rounded-lg border ${border} px-3 py-2 inline-block ${panelBg} text-sm font-semibold`}>QueryDocs</div>
 
         <div className="flex items-center gap-3">
-          <span className={`${muted} text-sm`}>{isDark ? "Dark" : "Light"}</span>
+          {/* Mobile: menu toggle */}
+          <button
+            className="md:hidden p-2 rounded-md border border-transparent hover:bg-slate-200/10"
+            onClick={() => setSidebarOpen(true)}
+            aria-label="Open menu"
+          >
+            <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M4 6h16M4 12h16M4 18h16" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </button>
+
+          <span className={`${muted} text-sm hidden sm:inline`}>{isDark ? "Dark" : "Light"}</span>
           <button
             onClick={() => setIsDark((s) => !s)}
             aria-pressed={isDark}
             className={`w-12 h-7 flex items-center p-1 rounded-full transition ${isDark ? "bg-slate-700" : "bg-slate-200"}`}
+            title="Toggle theme"
           >
             <span className={`block w-5 h-5 rounded-full bg-white shadow transform transition ${isDark ? "translate-x-5" : "translate-x-0"}`} />
           </button>
         </div>
       </header>
 
-      <div className={` rounded-xl p-4 h-[78vh] flex gap-6 ${panelBg}`}>
-        {/* Sidebar */}
-        <aside className={`w-72 max-w-[22rem] ${panelBg} border ${border} rounded-md overflow-hidden`}>
-          <div className={`px-4 py-3 font-semibold border-b ${border}`}>SQL Tutorial</div>
+      {/* On very small screens show a select to jump topics */}
+      <div className="mb-4 md:hidden">
+        <label className={`sr-only`}>Select topic</label>
+        <select
+          value={activeId}
+          onChange={handleMobileSelect}
+          className={`w-full rounded-md p-2 border ${border} ${panelBg} ${muted}`}
+        >
+          {topicsData.map((t) => (
+            <option key={t.id} value={t.id}>
+              {t.title}
+            </option>
+          ))}
+        </select>
+      </div>
 
+      <div className={`rounded-xl p-3 md:p-4 flex flex-col md:flex-row gap-4 md:gap-6`}>
+        {/* Sidebar for md+ */}
+        <aside className={`hidden md:block w-72 max-w-[22rem] ${panelBg} border ${border} rounded-md overflow-hidden`}>
+          <div className={`px-4 py-3 font-semibold border-b ${border}`}>SQL Tutorial</div>
           <nav className="sidebar-scroll max-h-[68vh] overflow-y-auto px-2 py-3 space-y-1">
             {topicsData.map((t) => {
               const isActive = t.id === activeId;
@@ -177,11 +188,49 @@ export default function QueryDocs() {
           </nav>
         </aside>
 
+        {/* Mobile Sidebar overlay */}
+        {sidebarOpen && (
+          <div className="md:hidden fixed inset-0 z-40">
+            <div
+              className="absolute inset-0 bg-black/40"
+              onClick={() => setSidebarOpen(false)}
+              aria-hidden="true"
+            />
+            <div className={`absolute left-0 top-0 bottom-0 w-4/5 max-w-xs ${panelBg} border-r ${border} p-3 overflow-y-auto`}>
+              <div className="flex items-center justify-between mb-3">
+                <div className="font-semibold">SQL Tutorial</div>
+                <button onClick={() => setSidebarOpen(false)} aria-label="Close menu" className="p-1">
+                  ✕
+                </button>
+              </div>
+              <nav className="space-y-2">
+                {topicsData.map((t) => {
+                  const isActive = t.id === activeId;
+                  return (
+                    <button
+                      key={t.id}
+                      onClick={() => {
+                        setActiveId(t.id);
+                        setSidebarOpen(false);
+                      }}
+                      className={`w-full text-left px-3 py-2 rounded-md text-sm flex items-center transition ${
+                        isActive ? sidebarActive : `${muted} hover:bg-slate-100/30`
+                      }`}
+                    >
+                      {t.title}
+                    </button>
+                  );
+                })}
+              </nav>
+            </div>
+          </div>
+        )}
+
         {/* Content */}
-        <main className={`flex-1 bg-transparent border ${border} rounded-md p-6 overflow-auto content-scroll`}>
+        <main className={`flex-1 bg-transparent border ${border} rounded-md p-4 overflow-auto content-scroll`} style={{ maxHeight: "calc(100vh - 170px)" }}>
           <article className="max-w-none">
             <div className="flex items-start justify-between mb-4">
-              <h2 className={`text-2xl ${isDark ? "text-slate-100" : "text-slate-900"}`}>{activeTopic.title}</h2>
+              <h2 className={`text-xl sm:text-2xl ${isDark ? "text-slate-100" : "text-slate-900"}`}>{activeTopic.title}</h2>
             </div>
 
             <div className="space-y-6">
@@ -192,10 +241,7 @@ export default function QueryDocs() {
                     .map((p) => p.trim())
                     .filter(Boolean);
                   return (
-                    <div
-                      key={i}
-                      className={`max-w-none ${isDark ? "prose prose-invert text-slate-200" : "prose text-slate-800"}`}
-                    >
+                    <div key={i} className={`max-w-none ${isDark ? "prose prose-invert text-slate-200" : "prose text-slate-800"}`}>
                       {paragraphs.map((p, idx) => (
                         <p key={idx}>{p}</p>
                       ))}
@@ -220,9 +266,7 @@ export default function QueryDocs() {
                       <div className="relative overflow-visible" aria-hidden={!isCopied}>
                         <div
                           className={`inline-flex items-center justify-center rounded-full mr-2 px-3 py-1 text-xs transform transition-all duration-300 ${
-                            isCopied
-                              ? "scale-100 opacity-100"
-                              : "scale-75 opacity-0 pointer-events-none"
+                            isCopied ? "scale-100 opacity-100" : "scale-75 opacity-0 pointer-events-none"
                           } ${isDark ? "bg-emerald-400 text-black" : "bg-emerald-600 text-white"}`}
                         >
                           ✓ Copied
