@@ -196,7 +196,12 @@ export default function QueryDocs() {
               onClick={() => setSidebarOpen(false)}
               aria-hidden="true"
             />
-            <div className={`absolute left-0 top-0 bottom-0 w-4/5 max-w-xs ${panelBg} border-r ${border} p-3 overflow-y-auto`}>
+            {/* <-- UPDATED: use solid dark bg + readable text when isDark === true */}
+            <div
+              className={`absolute left-0 top-0 bottom-0 w-4/5 max-w-xs p-3 overflow-y-auto border-r ${border} ${
+                isDark ? "bg-[#02020a] text-slate-100" : panelBg
+              }`}
+            >
               <div className="flex items-center justify-between mb-3">
                 <div className="font-semibold">SQL Tutorial</div>
                 <button onClick={() => setSidebarOpen(false)} aria-label="Close menu" className="p-1">
