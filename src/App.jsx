@@ -75,6 +75,7 @@ export default function QueryDocs() {
   const copyBtnBg = isDark ? "bg-slate-800/80 hover:bg-slate-700/90 text-white" : "bg-slate-100 hover:bg-slate-200 text-slate-900";
 
   // Scrollbar CSS (keeps original)
+  // Important : To Understand
   const scrollbarCss = isDark
     ? `
       .sidebar-scroll::-webkit-scrollbar,
@@ -291,7 +292,7 @@ export default function QueryDocs() {
                       >
                         Copy
                       </button>
-                    </div>
+                    </div>  
                   </div>
                 );
               })}

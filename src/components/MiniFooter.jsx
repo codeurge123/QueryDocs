@@ -1,4 +1,3 @@
-// MiniFooter component — paste into your QueryDocs.jsx file
 import React from "react";
 
 
